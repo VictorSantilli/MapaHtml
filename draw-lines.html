@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Desenhar Linhas com Leaflet Draw</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+        }
+        .btn {
+            background: #1a2b3c;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 22px;
+            font-size: 15px;
+            cursor: pointer;
+            margin: 4px 0;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #0070d1; }
+    </style>
+</head>
+<body>
+        <div id="sidebar" style="position:absolute;left:10px;top:10px;z-index:1000;background:#fff;padding:12px 18px;border-radius:8px;box-shadow:0 2px 8px #0002;">
+            <div><b>Rota e Ligações</b></div>
+            <button id="desenharRotaBtn" class="btn">Desenhar rota principal</button>
+            <button id="unirPontosBtn" class="btn" style="margin-left:8px;">Unir pontos próximos</button>
+            <div style="margin:8px 0;" hidden>
+                Área para ligar:
+                <select id="areaLigacao"></select>
+                <button id="ligarAreaBtn" class="btn">Ligar área à rota</button>
+            </div>
+            <button id="limparLigacoesBtn" class="btn" style="margin-top:8px;width:100%">Limpar ligações das áreas</button>
+            <button id="ligarTodasBtn" class="btn" style="margin-top:8px;width:100%">Ligar todas as áreas</button>
+            <div style="margin-top:10px;">
+                <b>Código da rota e ligações:</b><br>
+                <textarea id="codigoFinal" rows="8" style="width:220px;"></textarea>
+            </div>
+        </div>
+        <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script>
+        // Inicializa o mapa
+        const map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: -5
+        });
+        // Ajuste os bounds conforme sua imagem
+        const bounds = [[0, 0], [2080, 3000]];
+        map.fitBounds(bounds);
+        // Adicione sua imagem de fundo se quiser
+        L.imageOverlay('pavimento 1.png', bounds).addTo(map);
+
+        // Camada para desenhar
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+        // Carrega áreas do localStorage (definidas em pontos.html)
+        const areas = JSON.parse(localStorage.getItem('areas') || '[]');
+
+        // Preenche select de áreas para ligação
+        const areaLigacaoSel = document.getElementById('areaLigacao');
+        areas.forEach((a, i) => {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = a.nome;
+            areaLigacaoSel.appendChild(opt);
+        });
+
+        let rotaLayers = [];
+        let rotaPontos = [];
+        let ligacoes = [];
+        let aguardandoRota = false;  
+        let aguardandoLigacao = false;
+        let areaLigacaoIdx = 0;
+
+        areaLigacaoSel.onchange = () => areaLigacaoIdx = Number(areaLigacaoSel.value);
+
+        document.getElementById('desenharRotaBtn').onclick = () => {
+            aguardandoRota = true;
+            alert('Desenhe uma rota principal (você pode desenhar várias).');
+        };
+
+        document.getElementById('ligarAreaBtn').onclick = () => {
+            if (rotaLayers.length === 0) {
+                alert('Desenhe ao menos uma rota principal primeiro!');
+                return;
+            }
+            aguardandoLigacao = true;
+            alert('Clique em um ponto de qualquer rota para ligar a área selecionada.');
+        };
+
+        document.getElementById('ligarTodasBtn').onclick = () => {
+            if (rotaLayers.length === 0) {
+                alert('Desenhe ao menos uma rota principal primeiro!');
+                return;
+            }
+            // Remove ligações anteriores do mapa
+            ligacoes.forEach(l => { if (l.linhaObj) map.removeLayer(l.linhaObj); });
+            ligacoes = [];
+            areas.forEach(area => {
+                let minDist = Infinity, nearest = null;
+                rotaPontos.forEach(pt => {
+                    const d = Math.sqrt((pt.lat - area.centro[0])**2 + (pt.lng - area.centro[1])**2);
+                    if (d < minDist) { minDist = d; nearest = pt; }
+                });
+                const linha = L.polyline([area.centro, [nearest.lat, nearest.lng]], {color: 'red', weight: 3, dashArray: '4 4'}).addTo(map);
+                ligacoes.push({ area: area.nome, areaCentro: area.centro, rotaPonto: [nearest.lat, nearest.lng], linhaObj: linha });
+            });
+            atualizarCodigoFinal();
+        };
+
+        // Controle de desenho: permite polilinha sempre que aguardandoRota
+        const drawControl = new L.Control.Draw({
+            draw: {
+                polyline: true,
+                polygon: false,
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+            },
+            edit: {
+                featureGroup: drawnItems
+            }
+        });
+        map.addControl(drawControl);
+
+        // Evento ao criar uma linha
+        map.on(L.Draw.Event.CREATED, function (e) {
+            const layer = e.layer;
+            if (aguardandoRota) {
+                rotaLayers.push(layer);
+                drawnItems.addLayer(layer);
+                // Adiciona todos os pontos da nova rota à lista global
+                rotaPontos = [];
+                rotaLayers.forEach(l => {
+                    l.getLatLngs().forEach(pt => rotaPontos.push(pt));
+                });
+                aguardandoRota = false;
+                atualizarCodigoFinal();
+            } else {
+                alert('Use os botões do painel para desenhar.');
+            }
+        });
+
+        // Clique no mapa para criar ligação área-rota
+        map.on('click', function(e) {
+            if (aguardandoLigacao && rotaLayers.length > 0) {
+                const latlng = e.latlng;
+                let minDist = Infinity, nearest = null;
+                rotaPontos.forEach(pt => {
+                    const d = Math.sqrt((pt.lat - latlng.lat)**2 + (pt.lng - latlng.lng)**2);
+                    if (d < minDist) { minDist = d; nearest = pt; }
+                });
+                const area = areas[areaLigacaoIdx];
+                const linha = L.polyline([area.centro, [nearest.lat, nearest.lng]], {color: 'red', weight: 3, dashArray: '4 4'}).addTo(map);
+                ligacoes.push({ area: area.nome, areaCentro: area.centro, rotaPonto: [nearest.lat, nearest.lng], linhaObj: linha });
+                atualizarCodigoFinal();
+                aguardandoLigacao = false;
+            }
+        });
+
+        // Botão Unir pontos próximos
+        const unirDist = 10; // distância máxima para unir pontos
+        function pontosIguais(a, b) {
+            return Math.abs(a.lat - b.lat) < 1e-8 && Math.abs(a.lng - b.lng) < 1e-8;
+        }
+        document.getElementById('unirPontosBtn').onclick = () => {
+            // Coleta todos os pontos de todas as rotas
+            let todosPontos = [];
+            rotaLayers.forEach(l => {
+                l.getLatLngs().forEach(pt => todosPontos.push(pt));
+            });
+            // Marca quais já foram fundidos
+            let usados = new Array(todosPontos.length).fill(false);
+            for (let i = 0; i < todosPontos.length; i++) {
+                if (usados[i]) continue;
+                for (let j = i + 1; j < todosPontos.length; j++) {
+                    if (usados[j]) continue;
+                    const d = Math.sqrt((todosPontos[i].lat - todosPontos[j].lat) ** 2 + (todosPontos[i].lng - todosPontos[j].lng) ** 2);
+                    if (d < unirDist) {
+                        // Unifica: todos os pontos j iguais ao i
+                        todosPontos[j].lat = todosPontos[i].lat;
+                        todosPontos[j].lng = todosPontos[i].lng;
+                        usados[j] = true;
+                    }
+                }
+            }
+            // Atualiza as rotas no mapa
+            rotaLayers.forEach(l => l.setLatLngs(l.getLatLngs()));
+            // Atualiza lista global de pontos
+            rotaPontos = [];
+            rotaLayers.forEach(l => {
+                l.getLatLngs().forEach(pt => rotaPontos.push(pt));
+            });
+            alert('Pontos próximos foram unidos!');
+            atualizarCodigoFinal();
+        };
+
+        document.getElementById('limparLigacoesBtn').onclick = () => {
+            ligacoes.forEach(l => { if (l.linhaObj) map.removeLayer(l.linhaObj); });
+            ligacoes = [];
+            atualizarCodigoFinal();
+        };
+
+        function atualizarCodigoFinal() {
+            const txt = document.getElementById('codigoFinal');
+            let segmentos = [];
+            let id = 1;
+            // Rotas principais: cada trecho entre dois pontos vira um segmento
+            rotaLayers.forEach(l => {
+                const pts = l.getLatLngs().map(pt => [pt.lat, pt.lng]);
+                for (let i = 1; i < pts.length; i++) {
+                    segmentos.push({ id: id++, a: pts[i - 1], b: pts[i] });
+                }
+            });
+            // Ligações das áreas: cada ligação é um segmento
+            ligacoes.forEach(l => {
+                segmentos.push({ id: id++, a: l.areaCentro, b: l.rotaPonto });
+            });
+            // Áreas (nome, polígono, centro, tipo, cor, popup, icon)
+            const areasExport = areas.map(a => ({
+                nome: a.nome,
+                poligono: a.poligono,
+                centro: a.centro,
+                tipo: 'polygon',
+                cor: '#f0f0f0',
+                popup: 'Área importada do aa.txt',
+                icon: 'mapa.png'
+            }));
+            txt.value = JSON.stringify({ segmentos, areas: areasExport }, null, 2);
+        }
+    </script>
+</body>
+</html>

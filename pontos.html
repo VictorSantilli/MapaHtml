@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Definir Pontos das Áreas</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        html, body, #map { height: 100%; margin: 0; }
+        #painel { position:absolute;left:10px;top:10px;z-index:1000;background:#fff;padding:12px 18px;border-radius:8px;box-shadow:0 2px 8px #0002;max-width:320px; }
+        .btn {
+            background: #1a2b3c;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 22px;
+            font-size: 15px;
+            cursor: pointer;
+            margin: 4px 0;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #0070d1; }
+    </style>
+</head>
+<body>
+    <div id="painel">
+        <div><b>2. Definir ponto central das áreas</b></div>
+        <div id="infoAreaAtual" style="margin:8px 0;"></div>
+        <button id="voltarAreasBtn" class="btn">Voltar</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let areas = JSON.parse(localStorage.getItem('areas') || '[]');
+        let areaPendenteIdx = 0;
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5 });
+        const bounds = [[0, 0], [2080, 3000]];
+        map.fitBounds(bounds);
+        L.imageOverlay('pavimento 1.png', bounds).addTo(map);
+        function mostrarAreaAtualParaPonto() {
+            const info = document.getElementById('infoAreaAtual');
+            if (areaPendenteIdx >= areas.length) {
+                localStorage.setItem('areas', JSON.stringify(areas));
+                window.location.href = 'draw-lines.html';
+                return;
+            }
+            info.innerHTML = `<b>Área:</b> ${areas[areaPendenteIdx].nome}<br>Clique no mapa para definir o ponto central.`;
+        }
+        document.getElementById('voltarAreasBtn').onclick = () => {
+            localStorage.setItem('areas', JSON.stringify(areas));
+            window.location.href = 'areas.html';
+        };
+        map.on('click', function(e) {
+            if (areaPendenteIdx < areas.length) {
+                areas[areaPendenteIdx].centro = [e.latlng.lat, e.latlng.lng];
+                areaPendenteIdx++;
+                mostrarAreaAtualParaPonto();
+            }
+        });
+        mostrarAreaAtualParaPonto();
+    </script>
+</body>
+</html>

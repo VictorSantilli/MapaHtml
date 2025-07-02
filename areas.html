@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Definir Áreas (Polígonos)</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <style>
+        html, body, #map { height: 100%; margin: 0; }
+        #painel { position:absolute;left:10px;top:10px;z-index:1000;background:#fff;padding:12px 18px;border-radius:8px;box-shadow:0 2px 8px #0002;max-width:340px; }
+        ul { max-height: 120px; overflow: auto; margin: 8px 0 0 0; padding: 0; }
+        li { list-style: none; margin: 2px 0; }
+        .btn {
+            background: #1a2b3c;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 22px;
+            font-size: 15px;
+            cursor: pointer;
+            margin: 4px 0;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #0070d1; }
+    </style>
+</head>
+<body>
+    <div id="painel">
+        <div><b>1. Definir Áreas (desenhe o polígono de cada área)</b></div>
+        <input id="nomeAreaInput" placeholder="Nome da área" style="width:140px;">
+        <button id="addAreaBtn" class="btn">Adicionar área</button>
+        <ul id="listaAreas"></ul>
+        <button id="avancarPontosBtn" class="btn" style="margin-top:10px;width:100%">Avançar para pontos</button>
+    </div>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script>
+        const bounds = [[0, 0], [2080, 3000]];
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5 });
+        map.fitBounds(bounds);
+        L.imageOverlay('pavimento 1.png', bounds).addTo(map);
+        const drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        const drawControl = new L.Control.Draw({
+            draw: {
+                polygon: true,
+                polyline: false,
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+            },
+            edit: { featureGroup: drawnItems }
+        });
+        map.addControl(drawControl);
+
+        let areas = JSON.parse(localStorage.getItem('areas') || '[]');
+        let areaTempNome = null;
+        let areaTempLayer = null;
+
+        function atualizarListaAreas() {
+            const ul = document.getElementById('listaAreas');
+            ul.innerHTML = '';
+            areas.forEach((a,i) => {
+                const li = document.createElement('li');
+                li.textContent = a.nome + (a.poligono ? ' (polígono ok)' : '');
+                const btn = document.createElement('button');
+                btn.textContent = 'Remover';
+                btn.style = 'margin-left:8px;';
+                btn.className = 'btn';
+                btn.onclick = () => {
+                    if(a._layerId) { // remove do mapa
+                        const l = drawnItems.getLayer(a._layerId);
+                        if(l) drawnItems.removeLayer(l);
+                    }
+                    areas.splice(i,1); atualizarListaAreas();
+                };
+                li.appendChild(btn);
+                ul.appendChild(li);
+            });
+        }
+
+        document.getElementById('addAreaBtn').onclick = () => {
+            const nome = document.getElementById('nomeAreaInput').value.trim();
+            if (!nome) return alert('Digite o nome da área!');
+            areaTempNome = nome;
+            document.getElementById('nomeAreaInput').value = '';
+            alert('Agora desenhe o polígono da área no mapa.');
+        };
+
+        map.on(L.Draw.Event.CREATED, function (e) {
+            if (!areaTempNome) {
+                alert('Digite o nome da área antes de desenhar!');
+                return;
+            }
+            const layer = e.layer;
+            drawnItems.addLayer(layer);
+            const latlngs = layer.getLatLngs()[0].map(pt => [pt.lat, pt.lng]);
+            areas.push({ nome: areaTempNome, poligono: latlngs, _layerId: layer._leaflet_id });
+            areaTempNome = null;
+            atualizarListaAreas();
+        });
+
+        // Remove polígono do mapa ao editar/remover
+        map.on('draw:deleted', function(e) {
+            e.layers.eachLayer(function(layer) {
+                areas = areas.filter(a => a._layerId !== layer._leaflet_id);
+            });
+            atualizarListaAreas();
+        });
+
+        document.getElementById('avancarPontosBtn').onclick = () => {
+            if (areas.length === 0) { alert('Adicione ao menos uma área!'); return; }
+            if (areas.some(a => !a.poligono)) { alert('Desenhe o polígono de todas as áreas!'); return; }
+            // Remove _layerId antes de salvar
+            const areasToSave = areas.map(a => ({ nome: a.nome, poligono: a.poligono }));
+            localStorage.setItem('areas', JSON.stringify(areasToSave));
+            window.location.href = 'pontos.html';
+        };
+        atualizarListaAreas();
+    </script>
+</body>
+</html>
