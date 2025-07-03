@@ -183,6 +183,9 @@
             <button id="closeSidebar" title="Fechar">×</button>
         </div>
         <div class="sidebar-content">
+            <label for="areaBuscaSelect">Buscar área</label>
+            <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off" placeholder="Digite para buscar..." />
+            <datalist id="areaBuscaList"></datalist>
             <label for="categoriaSelect">Categoria</label>
             <select id="categoriaSelect"></select>
             <label for="andarSelect">Andar</label>
@@ -301,15 +304,25 @@
                         L.popup({ className: 'custom-popup' })
                             .setLatLng(a.label)
                             .setContent(`
-                              <div class=\"popup-content\">
-
-                                <img src=\"${a.icon}\" class=\"popup-icon\" alt=\"Ícone\">
-
-                                <div><b>${a.nome}</b><br>${a.popup}</div>
-
+                              <div class="popup-content">
+                                <img src="${a.icon}" class="popup-icon" alt="Ícone">
+                                <div><b>${a.nome}</b><br>${a.popup || ''}<br>
+                                  <span class="popup-rota" style="color:#0070d1;cursor:pointer;font-weight:bold;">ROTA</span>
+                                </div>
                               </div>
                             `)
                             .openOn(map);
+                        // Adiciona ação ao texto ROTA
+                        setTimeout(() => {
+                            const rotaEl = document.querySelector('.popup-rota');
+                            if (rotaEl) {
+                                rotaEl.onclick = function() {
+                                    document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
+                                    document.getElementById('destino').dispatchEvent(new Event('input'));
+                                    L.popup().remove();
+                                };
+                            }
+                        }, 100);
                     });
                     areaObjs.push(area);
                 }
@@ -525,6 +538,36 @@
             });
         }
         atualizarDatalistsGlobal();
+
+        // Preenche datalist de busca lateral
+        function atualizarDatalistBuscaLateral() {
+            const allAreas = getAllAreasWithAndar();
+            const buscaList = document.getElementById('areaBuscaList');
+            buscaList.innerHTML = '';
+            allAreas.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = `${a.nome} [${a.andarNome}]`;
+                buscaList.appendChild(opt);
+            });
+        }
+        atualizarDatalistBuscaLateral();
+        // Seleciona área ao escolher na busca lateral
+        document.getElementById('areaBuscaSelect').addEventListener('change', function() {
+            const val = this.value;
+            const area = getAllAreasWithAndar().find(a => `${a.nome} [${a.andarNome}]` === val);
+            if (!area) return;
+            if (currentAndarIdx !== area.andar) {
+                andarSelect.value = area.andar;
+                desenharAndar(area.andar);
+            }
+            setTimeout(() => {
+                const idx = andares[area.andar].areas.findIndex(a2 => a2.nome === area.nome);
+                if (idx >= 0 && areaObjs[idx]) {
+                    areaObjs[idx].fire('click');
+                    map.setView(area.label, Math.max(map.getZoom(), 1), { animate: true });
+                }
+            }, 300);
+        });
 
         // Função para buscar área pelo nome+andar
         function findAreaByInput(inputValue) {
