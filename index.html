@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>Mapa Interativo SVG com Leaflet</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         html,
@@ -114,20 +117,27 @@
             font-size: 16px;
             cursor: pointer;
         }
-
-        .simular {
-            background: #ffd23c;
-            color: #222;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 22px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
         #map {
             margin-left: 270px;
         }
+
+        #menuBtn {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 18px;
+            z-index: 2100;
+            background: #0070d1;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 1px 1px 8px #0002;
+        }
+
 
         @media (max-width: 600px) {
             #sidebar {
@@ -154,23 +164,8 @@
             #menuBtn {
                 display: block;
             }
-        }
 
-        #menuBtn {
-            display: none;
-            position: fixed;
-            top: 18px;
-            left: 18px;
-            z-index: 2100;
-            background: #0070d1;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            width: 44px;
-            height: 44px;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 1px 1px 8px #0002;
+
         }
     </style>
 </head>
@@ -184,7 +179,8 @@
         </div>
         <div class="sidebar-content">
             <label for="areaBuscaSelect">Buscar área</label>
-            <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off" placeholder="Digite para buscar..." />
+            <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off"
+                placeholder="Digite para buscar..." />
             <datalist id="areaBuscaList"></datalist>
             <label for="categoriaSelect">Categoria</label>
             <select id="categoriaSelect"></select>
@@ -198,7 +194,6 @@
             <datalist id="destinoList"></datalist>
             <div class="sidebar-actions">
                 <button id="navegarBtn">Navegar</button>
-                <button id="simularBtn" class="simular">Simular</button>
             </div>
         </div>
     </div>
@@ -213,28 +208,38 @@
         // Sidebar responsiva: abrir/fechar no mobile
         const sidebar = document.getElementById('sidebar');
         const menuBtn = document.getElementById('menuBtn');
+        const btnCloseSideBar = document.getElementById('closeSidebar')
+
         function openSidebar() {
             sidebar.classList.add('open');
         }
         function closeSidebar() {
             sidebar.classList.remove('open');
         }
+
         menuBtn.onclick = () => {
             sidebar.classList.toggle('open');
+
             if (sidebar.classList.contains('open')) {
+                // Esconde o botão ao abrir a sidebar
+                menuBtn.style.display = 'none';
                 desenharAndar(currentAndarIdx);
             }
         };
-        document.getElementById('closeSidebar').onclick = closeSidebar;
+        btnCloseSideBar.onclick = () => {
+            closeSidebar();
+            if (window.innerWidth <= 600) {
+                menuBtn.style.display = 'block'; // Mostra o botão ao fechar
+            }
+        };
+
+
         // Fecha sidebar ao navegar (mobile)
-        document.getElementById('navegarBtn').onclick = function() {
+        document.getElementById('navegarBtn').onclick = function () {
             // ...existing code...
             if (window.innerWidth <= 600) closeSidebar();
         };
-        // Fecha sidebar ao simular (mobile)
-        document.getElementById('simularBtn').onclick = function() {
-            if (window.innerWidth <= 600) closeSidebar();
-        };
+
         // Abre sidebar automaticamente em desktop
         if (window.innerWidth > 600) openSidebar();
 
@@ -316,7 +321,7 @@
                         setTimeout(() => {
                             const rotaEl = document.querySelector('.popup-rota');
                             if (rotaEl) {
-                                rotaEl.onclick = function() {
+                                rotaEl.onclick = function () {
                                     document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
                                     document.getElementById('destino').dispatchEvent(new Event('input'));
                                     L.popup().remove();
@@ -523,7 +528,7 @@
 
         function atualizarDatalistsGlobal() {
             const allAreas = getAllAreasWithAndar();
-           
+
             const origemDatalist = document.getElementById('origemList');
             const destinoDatalist = document.getElementById('destinoList');
             origemDatalist.innerHTML = '';
@@ -552,7 +557,7 @@
         }
         atualizarDatalistBuscaLateral();
         // Seleciona área ao escolher na busca lateral
-        document.getElementById('areaBuscaSelect').addEventListener('change', function() {
+        document.getElementById('areaBuscaSelect').addEventListener('change', function () {
             const val = this.value;
             const area = getAllAreasWithAndar().find(a => `${a.nome} [${a.andarNome}]` === val);
             if (!area) return;
@@ -671,22 +676,6 @@
             });
         };
 
-        // Abre/fecha a sidebar no mobile
-        // const menuBtn = document.getElementById('menuBtn');
-        menuBtn.onclick = () => {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-            if (sidebar.classList.contains('open')) {
-                // Desenha o andar atual na abertura da sidebar
-                desenharAndar(currentAndarIdx);
-            } else {
-                // Limpa o mapa ao fechar (opcional)
-                // areaObjs.forEach(a => map.removeLayer(a));
-                // labelObjs.forEach(l => map.removeLayer(l));
-                // Object.values(polyObjs).forEach(p => map.removeLayer(p));
-                // areaObjs = []; labelObjs = []; polyObjs = {};
-            }
-        };
     </script>
 </body>
 
