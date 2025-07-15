@@ -913,7 +913,6 @@ const andares = [
                             1243.1376726781132,
                             1353.9048389474865
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -968,7 +967,6 @@ const andares = [
                             1220.624846031084,
                             841.0421599599742
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1007,7 +1005,6 @@ const andares = [
                             1039.5216627816492,
                             825.5463090354003
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1038,7 +1035,6 @@ const andares = [
                             1030.5165321228376,
                             951.5125810674209
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1077,7 +1073,6 @@ const andares = [
                             1028.0151069398344,
                             1103.471893360017
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1108,7 +1103,6 @@ const andares = [
                             1001.5,
                             1288.9222382960475
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1147,7 +1141,6 @@ const andares = [
                             984.9905937921786,
                             1438.8820859532148
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1182,7 +1175,6 @@ const andares = [
                             818.8959616407634,
                             1439.381952112072
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1221,7 +1213,6 @@ const andares = [
                             733.8475054186532,
                             1440.3816844297864
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1252,7 +1243,6 @@ const andares = [
                             640.7944886109326,
                             1457.8769999897893
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1283,7 +1273,6 @@ const andares = [
                             560.2485977182282,
                             1445.880212177216
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1338,7 +1327,6 @@ const andares = [
                             371.6411389197839,
                             1468.3741893257911
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1385,7 +1373,6 @@ const andares = [
                             381.6468396517969,
                             1658.8231958503936
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1432,7 +1419,6 @@ const andares = [
                             531.2320655953906,
                             1701.3118193532578
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1475,7 +1461,6 @@ const andares = [
                             426.8475054186532,
                             2130.3364461235283
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1510,7 +1495,6 @@ const andares = [
                             595.9438477896723,
                             2135.8349738709576
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1541,7 +1525,6 @@ const andares = [
                             891.1120193840547,
                             2150.3310924778175
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1592,7 +1575,6 @@ const andares = [
                             904.6197153722723,
                             1984.875393896076
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1623,7 +1605,6 @@ const andares = [
                             1594.1815683146128,
                             2059.9408422148936
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1654,7 +1635,6 @@ const andares = [
                             1603.1866989734247,
                             2160.4139401451957
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1685,7 +1665,6 @@ const andares = [
                             1599.1844186806195,
                             2308.874189325791
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1716,7 +1695,6 @@ const andares = [
                             1391.0658434547497,
                             2297.377267672075
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1747,7 +1725,6 @@ const andares = [
                             1109.9056528851854,
                             2175.909791069769
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1778,7 +1755,6 @@ const andares = [
                             1098.899382079971,
                             2055.9419129440357
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1809,7 +1785,6 @@ const andares = [
                             1102.9016623727764,
                             1936.9737671360162
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1840,15 +1815,13 @@ const andares = [
                             1107.4042277021822,
                             1814.506558215996
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
                     },
                     {
                         nome: "Loja 27",
-                        categoria: "Serviços",
-                        subcategoria: "Banco",
+                        categoria: 'elevador',
                         coord: [
                             [
                                 1222.235035578466,
@@ -1871,7 +1844,6 @@ const andares = [
                             1135.4201897518185,
                             1696.5381447256912
                         ],
-                        tipo: "polygon",
                         cor: "#f0f0f0",
                         popup: "Área importada do aa.txt",
                         icon: "mapa.png"
@@ -1879,3 +1851,64 @@ const andares = [
                 ] 
             }
 ];
+
+// Exemplo de novo andar para teste do elevador
+andares.push({
+    nome: 'Andar Teste Elevador',
+    imagem: 'mapa.png',
+    bounds: [[0,0],[1000,1000]],
+    segmentos: [
+        { id: 1, a: [200, 200], b: [500, 500] },
+        { id: 2, a: [500, 500], b: [800, 800] }
+    ],
+    areas: [
+        {
+            nome: 'Sala Teste',
+            categoria: 'Sala',
+            coord: [[190,190],[210,190],[210,210],[190,210]],
+            label: [200, 200],
+            cor: '#aaf',
+            popup: 'Área de teste para navegação até o elevador',
+            icon: 'mapa.png'
+        },
+        {
+            nome: 'Elevador Teste',
+            categoria: 'elevador',
+            coord: [[780,780],[820,780],[820,820],[780,820]], // quadrado como polígono
+            label: [800, 800],
+            cor: '#ccc',
+            popup: 'Elevador de teste',
+            icon: 'mapa.png'
+        }
+    ]
+});
+
+// Exemplo de área de elevador correta para teste
+andares.push({
+    nome: 'Andar Elevador Teste',
+    imagem: 'mapa.png',
+    bounds: [[0,0],[1000,1000]],
+    segmentos: [
+        { id: 1, a: [200, 200], b: [800, 800] }
+    ],
+    areas: [
+        {
+            nome: 'Sala Teste',
+            categoria: 'Sala',
+            coord: [[190,190],[210,190],[210,210],[190,210]],
+            label: [200, 200],
+            cor: '#aaf',
+            popup: 'Área de teste para navegação até o elevador',
+            icon: 'mapa.png'
+        },
+        {
+            nome: 'Elevador Teste',
+            categoria: 'elevador',
+            coord: [[780,780],[820,780],[820,820],[780,820]], // quadrado como polígono
+            label: [800, 800],
+            cor: '#ccc',
+            popup: 'Elevador de teste',
+            icon: 'mapa.png'
+        }
+    ]
+});

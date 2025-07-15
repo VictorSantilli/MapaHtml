@@ -286,16 +286,9 @@
             // Desenha áreas
             andar.areas.forEach((a, i) => {
                 let area, label;
-                if (a.tipo === 'rectangle') {
-                    area = L.rectangle(a.coord, { color: 'transparent', weight: 3, fillColor: a.cor, fillOpacity: 0.5 }).addTo(map);
-                } else if (a.tipo === 'circle') {
-                    area = L.circle(a.coord, { radius: a.raio, color: 'transparent', weight: 3, fillColor: a.cor, fillOpacity: 0.5 }).addTo(map);
-                } else if (a.tipo === 'polygon') {
+              
                     area = L.polygon(a.coord, { color: 'transparent', weight: 3, fillColor: a.cor, fillOpacity: 0.5 }).addTo(map);
-                } else if (a.tipo === 'escada' || a.tipo === 'elevador') {
-                    // Desenha escada/elevador como círculo cinza
-                    area = L.circle(a.coord, { radius: a.raio || 40, color: 'gray', weight: 2, fillColor: a.cor || '#cccccc', fillOpacity: 0.7 }).addTo(map);
-                }
+                
                 if (area) {
                     area.on('click', function () {
                         areaObjs.forEach(a2 => a2.setStyle({ color: 'transparent' }));
@@ -361,6 +354,11 @@
             areaObjs.forEach(a => map.removeLayer(a));
             labelObjs.forEach(l => map.removeLayer(l));
             Object.values(polyObjs).forEach(p => map.removeLayer(p));
+            // Remove marcadores de rota e categoria ao trocar de andar
+            routeMarkers.forEach(m => map.removeLayer(m));
+            routeMarkers = [];
+            categoriaMarkers.forEach(m => map.removeLayer(m));
+            categoriaMarkers = [];
             areaObjs = []; labelObjs = []; polyObjs = {};
             desenharAndar(this.value);
         };
@@ -450,18 +448,35 @@
             // Remove pins anteriores
             routeMarkers.forEach(m => map.removeLayer(m));
             routeMarkers = [];
+            // Ícone boneco "banheiro" para origem
+            const origemIcon = L.icon({
+                iconUrl: 'https://www.svgrepo.com/show/308152/walking-person-go-walk-move.svg', // boneco banheiro
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
             if (origem) {
-                const markerOrigem = L.marker(origem, { title: 'Origem' }).addTo(map);
+                const markerOrigem = L.marker(origem, { title: 'Origem', icon: origemIcon }).addTo(map);
                 routeMarkers.push(markerOrigem);
             }
             if (destino) {
+                // Usa o ícone padrão do Leaflet (pin)
                 const markerDestino = L.marker(destino, { title: 'Destino' }).addTo(map);
                 routeMarkers.push(markerDestino);
             }
         }
-        // Atualiza o evento do botão navegar para usar o andar atual
+        // Atualiza o evento do botão navegar para usar o elevador se necessário
         const navegarBtn = document.getElementById('navegarBtn');
+        let aguardandoTransicaoAndar = false;
+        let transicaoDestino = null;
+        let transicaoDestinoLabel = null;
+        let transicaoAreaDestino = null;
+        let transicaoTransferDestino = null;
+        let transicaoAndarDestino = null;
+        let btnCheguei = null;
+
         navegarBtn.onclick = () => {
+            if (aguardandoTransicaoAndar) return; // Evita múltiplos cliques
             const origemInput = document.getElementById('origem').value;
             const destinoInput = document.getElementById('destino').value;
             const areaOrigem = findAreaByInput(origemInput);
@@ -479,11 +494,11 @@
                 const caminho = buscarCaminho(areaOrigem.label, areaDestino.label);
                 destacarCaminho(caminho, areaOrigem.label, areaDestino.label);
             } else {
-                // Andares diferentes: precisa passar por escada/elevador
-                const transferOrigem = findNearestTransferArea(areaOrigem.andar, areaOrigem.label);
-                const transferDestino = findNearestTransferArea(areaDestino.andar, areaDestino.label);
+                // Andares diferentes: prioriza elevador
+                const transferOrigem = findNearestElevadorArea(areaOrigem.andar, areaOrigem.label) || findNearestTransferArea(areaOrigem.andar, areaOrigem.label);
+                const transferDestino = findNearestElevadorArea(areaDestino.andar, areaDestino.label) || findNearestTransferArea(areaDestino.andar, areaDestino.label);
                 if (!transferOrigem || !transferDestino) {
-                    alert('Não há escada/elevador em um dos andares!');
+                    alert('Não há elevador ou escada em um dos andares!');
                     return;
                 }
                 // 1º trecho: andar de origem
@@ -493,13 +508,40 @@
                 }
                 const caminho1 = buscarCaminho(areaOrigem.label, transferOrigem.label);
                 destacarCaminho(caminho1, areaOrigem.label, transferOrigem.label);
-                // 2º trecho: andar de destino (após pequeno delay para visual)
-                // setTimeout(() => {
-                //     andarSelect.value = areaDestino.andar;
-                //     desenharAndar(areaDestino.andar);
-                //     const caminho2 = buscarCaminho(transferDestino.label, areaDestino.label);
-                //     destacarCaminho(caminho2, transferDestino.label, areaDestino.label);
-                // }, 1200);
+                // Prepara transição para o segundo andar
+                aguardandoTransicaoAndar = true;
+                transicaoDestino = areaDestino;
+                transicaoDestinoLabel = areaDestino.label;
+                transicaoAreaDestino = areaDestino;
+                transicaoTransferDestino = transferDestino;
+                transicaoAndarDestino = areaDestino.andar;
+                // Cria botão "Cheguei no andar"
+                if (!btnCheguei) {
+                    btnCheguei = document.createElement('button');
+                    btnCheguei.textContent = 'Cheguei no andar';
+                    btnCheguei.style.position = 'fixed';
+                    btnCheguei.style.bottom = '30px';
+                    btnCheguei.style.right = '30px';
+                    btnCheguei.style.zIndex = 3000;
+                    btnCheguei.style.background = '#0070d1';
+                    btnCheguei.style.color = '#fff';
+                    btnCheguei.style.fontSize = '18px';
+                    btnCheguei.style.padding = '14px 28px';
+                    btnCheguei.style.border = 'none';
+                    btnCheguei.style.borderRadius = '24px';
+                    btnCheguei.style.boxShadow = '2px 2px 12px #0002';
+                    btnCheguei.style.cursor = 'pointer';
+                    btnCheguei.onclick = function() {
+                        // Troca para o segundo andar e mostra o caminho
+                        andarSelect.value = transicaoAndarDestino;
+                        desenharAndar(transicaoAndarDestino);
+                        const caminho2 = buscarCaminho(transicaoTransferDestino.label, transicaoDestinoLabel);
+                        destacarCaminho(caminho2, transicaoTransferDestino.label, transicaoDestinoLabel);
+                        aguardandoTransicaoAndar = false;
+                        btnCheguei.remove();
+                    };
+                }
+                document.body.appendChild(btnCheguei);
             }
         };
 
@@ -513,7 +555,7 @@
                         nome: area.nome,
                         andar: idx,
                         andarNome: andar.nome,
-                        tipo: area.tipo,
+                        categoria: area.categoria, // agora só categoria
                         label: area.label
                     });
                 });
@@ -579,8 +621,8 @@
         // Função para buscar escada/elevador mais próxima
         function findNearestTransferArea(andarIdx, fromLabel) {
             const areas = andares[andarIdx].areas;
-            // Considera tipo 'escada' ou 'elevador' (pode ajustar conforme seu modelo)
-            const transferAreas = areas.filter(a => a.tipo === 'escada' || a.tipo === 'elevador');
+            // Considera categoria 'escada' ou 'elevador'
+            const transferAreas = areas.filter(a => a.categoria && (a.categoria.toLowerCase() === 'escada' || a.categoria.toLowerCase() === 'elevador'));
             if (transferAreas.length === 0) return null;
             let min = Infinity, nearest = null;
             transferAreas.forEach(a => {
@@ -589,11 +631,22 @@
             });
             return nearest;
         }
+
+        // Função para buscar elevador mais próximo
+        function findNearestElevadorArea(andarIdx, fromLabel) {
+            const areas = andares[andarIdx].areas;
+            const elevadores = areas.filter(a => a.categoria && a.categoria.toLowerCase() === 'elevador');
+            if (elevadores.length === 0) return null;
+            let min = Infinity, nearest = null;
+            elevadores.forEach(a => {
+                const d = dist(fromLabel, a.label);
+                if (d < min) { min = d; nearest = a; }
+            });
+            return nearest;
+        }
+
         // Define os bounds do PNG (ajuste conforme o tamanho da sua imagem)
         const bounds = [[0, 0], [1000, 1000]];
-
-        // Adiciona o PNG como overlay
-        // L.imageOverlay('mapa.png', bounds).addTo(map);
 
         // Ajusta o mapa para mostrar toda a imagem
         map.fitBounds(bounds);
@@ -635,10 +688,26 @@
             categoriaMarkers.forEach(m => map.removeLayer(m));
             categoriaMarkers = [];
             const cat = categoriaSelect.value;
-            // Destaca áreas da categoria
+            // Procura se o andar atual tem a categoria
+            const areasNoAndar = andares[currentAndarIdx].areas.filter(area => area.categoria === cat);
+            let andarComCategoria = currentAndarIdx;
+            if (cat && areasNoAndar.length === 0) {
+                // Procura o primeiro andar que tenha a categoria
+                for (let i = 0; i < andares.length; i++) {
+                    if (andares[i].areas.some(area => area.categoria === cat)) {
+                        andarComCategoria = i;
+                        break;
+                    }
+                }
+                if (andarComCategoria !== currentAndarIdx) {
+                    andarSelect.value = andarComCategoria;
+                    desenharAndar(andarComCategoria);
+                }
+            }
+            // Destaca áreas da categoria no andar selecionado
             let bounds = [];
             areaObjs.forEach((areaObj, idx) => {
-                const areaData = andares[currentAndarIdx].areas[idx];
+                const areaData = andares[andarComCategoria].areas[idx];
                 const label = areaData.label;
                 const labelValido = Array.isArray(label) && label.length === 2 &&
                     typeof label[0] === 'number' && typeof label[1] === 'number' &&
@@ -650,14 +719,13 @@
                     areaObj.setStyle({ color: 'transparent', weight: 3 });
                 }
             });
-            console.log('Labels válidos para centralizar:', bounds);
             if (bounds.length === 1) {
                 map.setView(bounds[0], map.getZoom(), { animate: true });
             } else if (bounds.length > 1) {
                 map.fitBounds(bounds, { padding: [40, 40] });
             }
             if (!cat) return;
-            andares[currentAndarIdx].areas.forEach((area, idx) => {
+            andares[andarComCategoria].areas.forEach((area, idx) => {
                 const label = area.label;
                 const labelValido = Array.isArray(label) && label.length === 2 &&
                     typeof label[0] === 'number' && typeof label[1] === 'number' &&

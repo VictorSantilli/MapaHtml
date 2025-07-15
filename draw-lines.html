@@ -79,7 +79,23 @@
         let aguardandoLigacao = false;
         let areaLigacaoIdx = 0;
 
-        areaLigacaoSel.onchange = () => areaLigacaoIdx = Number(areaLigacaoSel.value);
+        // Adiciona pins das áreas no mapa
+        let areaMarkers = [];
+        function desenharPinsAreas() {
+            // Remove pins antigos
+            areaMarkers.forEach(m => map.removeLayer(m));
+            areaMarkers = [];
+            areas.forEach(a => {
+                if (a.centro && Array.isArray(a.centro) && a.centro.length === 2) {
+                    const marker = L.marker(a.centro, { title: a.nome });
+                    marker.addTo(map);
+                    areaMarkers.push(marker);
+                }
+            });
+        }
+        desenharPinsAreas();
+
+        areaLigacaoSel.onchange = () => { areaLigacaoIdx = Number(areaLigacaoSel.value); desenharPinsAreas(); };
 
         document.getElementById('desenharRotaBtn').onclick = () => {
             aguardandoRota = true;
@@ -113,6 +129,7 @@
                 ligacoes.push({ area: area.nome, areaCentro: area.centro, rotaPonto: [nearest.lat, nearest.lng], linhaObj: linha });
             });
             atualizarCodigoFinal();
+            desenharPinsAreas();
         };
 
         // Controle de desenho: permite polilinha sempre que aguardandoRota
@@ -207,6 +224,7 @@
             ligacoes.forEach(l => { if (l.linhaObj) map.removeLayer(l.linhaObj); });
             ligacoes = [];
             atualizarCodigoFinal();
+            desenharPinsAreas();
         };
 
         function atualizarCodigoFinal() {

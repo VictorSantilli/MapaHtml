@@ -32,12 +32,24 @@
     <script>
         let areas = JSON.parse(localStorage.getItem('areas') || '[]');
         let areaPendenteIdx = 0;
+        let areaMarkers = [];
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5 });
         const bounds = [[0, 0], [2080, 3000]];
         map.fitBounds(bounds);
         L.imageOverlay('pavimento 1.png', bounds).addTo(map);
         function mostrarAreaAtualParaPonto() {
             const info = document.getElementById('infoAreaAtual');
+            // Remove todos os pins antigos
+            areaMarkers.forEach(m => map.removeLayer(m));
+            areaMarkers = [];
+            // Adiciona pins para todas as áreas já marcadas
+            areas.forEach((a, idx) => {
+                if (a.centro && Array.isArray(a.centro) && a.centro.length === 2) {
+                    const marker = L.marker(a.centro, { title: a.nome });
+                    marker.addTo(map);
+                    areaMarkers.push(marker);
+                }
+            });
             if (areaPendenteIdx >= areas.length) {
                 localStorage.setItem('areas', JSON.stringify(areas));
                 window.location.href = 'draw-lines.html';
