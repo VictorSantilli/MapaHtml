@@ -74,6 +74,7 @@
             currentGraph = buildGraph(currentSegmentos, currentNodes);
             if (overlayImg) map.removeLayer(overlayImg);
             overlayImg = L.imageOverlay(andar.imagem, andar.bounds).addTo(map);
+            // overlayImg = L.imageOverlay(andar.imagem, andar.bounds).addTo(map);
             areaObjs.forEach(a => map.removeLayer(a));
             labelObjs.forEach(l => map.removeLayer(l));
             Object.values(polyObjs).forEach(p => map.removeLayer(p));
