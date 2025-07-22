@@ -2240,7 +2240,7 @@ window.andares.push({
                 btnCheguei = document.createElement('button');
                 btnCheguei.textContent = 'Cheguei no andar';
                 btnCheguei.style.position = 'fixed';
-                btnCheguei.style.bottom = '30px';
+                btnCheguei.style.bottom = '120px';
                 btnCheguei.style.right = '30px';
                 btnCheguei.style.zIndex = 3000;
                 btnCheguei.style.background = '#0070d1';
@@ -2255,8 +2255,10 @@ window.andares.push({
                     // Troca para o segundo andar e mostra o caminho
                     andarSelect.value = transicaoAndarDestino;
                     desenharAndar(transicaoAndarDestino);
+
                     const caminho2 = buscarCaminho(transicaoTransferDestino.label, transicaoDestinoLabel);
                     destacarCaminho(caminho2, transicaoTransferDestino.label, transicaoDestinoLabel);
+                    
                     aguardandoTransicaoAndar = false;
                     btnCheguei.remove();
                 };
