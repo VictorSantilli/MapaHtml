@@ -5,7 +5,7 @@
     const params = new URLSearchParams(window.location.search);
     const mapaId = params.get('id') || '1'; // valor padrão caso não haja id
     const url = `https://localhost:44308/Mapas/${mapaId}`;
-    
+
     let response;
     try {
         response = await fetch(url);
@@ -23,38 +23,47 @@
         // Sidebar responsiva: abrir/fechar no mobile
         const sidebar = document.getElementById('sidebar');
         const menuBtn = document.getElementById('menuBtn');
-        function openSidebar() { sidebar.classList.add('open'); }
-        function closeSidebar() { sidebar.classList.remove('open'); }
+        const btnCloseSideBar = document.getElementById('closeSidebar')
+
+        function openSidebar() {
+            sidebar.classList.add('open');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            if (window.innerWidth <= 600) {
+                menuBtn.style.display = 'block'; // Mostra o botão ao fechar
+            }
+        }
         menuBtn.onclick = () => {
             sidebar.classList.toggle('open');
+
             if (sidebar.classList.contains('open')) {
-                desenharAndar(currentAndarIdx);
+                // Esconde o botão ao abrir a sidebar
+                menuBtn.style.display = 'none';
             }
         };
-        document.getElementById('closeSidebar').onclick = closeSidebar;
-        document.getElementById('navegarBtn').onclick = function() {
-            if (window.innerWidth <= 600) closeSidebar();
-        };
-        document.getElementById('simularBtn').onclick = function() {
-            if (window.innerWidth <= 600) closeSidebar();
+
+        btnCloseSideBar.onclick = () => {
+            closeSidebar();
         };
         if (window.innerWidth > 600) openSidebar();
 
-        document.getElementById('navegarBtn').onclick = () => {
-            const origemNome = document.getElementById('origem').value;
-            const destinoNome = document.getElementById('destino').value;
-            const areasAndar = andares[currentAndarIdx].areas;
-            const areaOrigem = areasAndar.find(a => a.nome === origemNome);
-            const areaDestino = areasAndar.find(a => a.nome === destinoNome);
-            if (!areaOrigem || !areaDestino) {
-                alert('Selecione áreas válidas para origem e destino!');
-                return;
-            }
-            const coordOrigem = areaOrigem.label;
-            const coordDestino = areaDestino.label;
-            const caminho = buscarCaminho(coordOrigem, coordDestino);
-            destacarCaminho(caminho);
-        };
+        // document.getElementById('navegarBtn').onclick = () => {
+        //     const origemNome = document.getElementById('origem').value;
+        //     const destinoNome = document.getElementById('destino').value;
+        //     const areasAndar = andares[currentAndarIdx].areas;
+        //     const areaOrigem = areasAndar.find(a => a.nome === origemNome);
+        //     const areaDestino = areasAndar.find(a => a.nome === destinoNome);
+        //     if (!areaOrigem || !areaDestino) {
+        //         alert('Selecione áreas válidas para origem e destino!');
+        //         return;
+        //     }
+        //     const coordOrigem = areaOrigem.label;
+        //     const coordDestino = areaDestino.label;
+        //     const caminho = buscarCaminho(coordOrigem, coordDestino);
+        //     destacarCaminho(caminho);
+        // };
 
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5 });
         let overlayImg = null;
@@ -101,7 +110,7 @@
                         setTimeout(() => {
                             const rotaEl = document.querySelector('.popup-rota');
                             if (rotaEl) {
-                                rotaEl.onclick = function() {
+                                rotaEl.onclick = function () {
                                     document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
                                     document.getElementById('destino').dispatchEvent(new Event('input'));
                                     L.popup().remove();
@@ -309,7 +318,7 @@
                     btnCheguei.style.borderRadius = '24px';
                     btnCheguei.style.boxShadow = '2px 2px 12px #0002';
                     btnCheguei.style.cursor = 'pointer';
-                    btnCheguei.onclick = function() {
+                    btnCheguei.onclick = function () {
                         andarSelect.value = transicaoAndarDestino;
                         desenharAndar(transicaoAndarDestino);
                         const caminho2 = buscarCaminho(transicaoTransferDestino.label, transicaoDestinoLabel);
@@ -320,6 +329,7 @@
                 }
                 document.body.appendChild(btnCheguei);
             }
+            closeSidebar();
         };
 
         function getAllAreasWithAndar() {
@@ -364,7 +374,7 @@
             });
         }
         atualizarDatalistBuscaLateral();
-        document.getElementById('areaBuscaSelect').addEventListener('change', function() {
+        document.getElementById('areaBuscaSelect').addEventListener('change', function () {
             const val = this.value;
             const area = getAllAreasWithAndar().find(a => `${a.nome} [${a.andarNome}]` === val);
             if (!area) return;
@@ -485,18 +495,6 @@
                 }
             });
         };
-        menuBtn.onclick = () => {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
-            if (sidebar.classList.contains('open')) {
-                desenharAndar(currentAndarIdx);
-            } else {
-                // Limpa o mapa ao fechar (opcional)
-                // areaObjs.forEach(a => map.removeLayer(a));
-                // labelObjs.forEach(l => map.removeLayer(l));
-                // Object.values(polyObjs).forEach(p => map.removeLayer(p));
-                // areaObjs = []; labelObjs = []; polyObjs = {};
-            }
-        };
+
     }
 })();
