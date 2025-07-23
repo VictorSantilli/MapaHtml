@@ -17,6 +17,8 @@
             margin: 0;
         }
 
+        /* Area de estilização do app*/
+
         .svg-overlay {
             pointer-events: auto;
         }
@@ -51,18 +53,18 @@
             align-items: center;
         }
 
+        /**/
+
         #sidebar {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 270px;
-            background: #fff;
-            border-right: 1px solid #ddd;
+            width: 300px;
             z-index: 1000;
-            box-shadow: 2px 0 8px #0001;
             display: flex;
             flex-direction: column;
+
         }
 
         .sidebar-header {
@@ -73,6 +75,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 30px;
         }
 
         .sidebar-header button {
@@ -98,9 +101,6 @@
         }
 
 
-        #map {
-            margin-left: 270px;
-        }
 
         #menuBtn {
             display: none;
@@ -108,10 +108,17 @@
             top: 10px;
             right: 18px;
             z-index: 2100;
-            
-           
+
+
         }
 
+        .displayOff {
+            display: none;
+        }
+
+        #closeSidebar{
+                display: none;
+            }
 
         @media (max-width: 600px) {
             #sidebar {
@@ -139,6 +146,10 @@
                 display: block;
             }
 
+            #closeSidebar{
+                display: block;
+            }
+
 
         }
     </style>
@@ -146,45 +157,60 @@
 
 <body>
     <button id="menuBtn" class="btn btn-primary d-md-none position-fixed top-0 end-0 m-3" title="Abrir menu">☰</button>
-    <div id="sidebar" class="bg-white border-end shadow d-flex flex-column open">
-        <div class="sidebar-header bg-primary text-white fw-bold px-3 py-2 d-flex justify-content-between align-items-center">
-            <span>Direções</span>
+
+    <button id="menuPisosBtn" class="btn btn-primary d-md-none position-fixed bot-0 end-0 m-3" title="Abrir menu"></button>
+
+
+    <div id="sidebar" class="d-flex flex-column open">
+
+        <div
+            class="sidebar-header bg-primary text-white fw-bold px-3 py-2 d-flex justify-content-end align-items-rigth">
+
             <button id="closeSidebar" class="btn btn-sm btn-light" title="Fechar">×</button>
         </div>
-        <div class="sidebar-content">
 
-            <div class="mb-3">
-                <label for="areaBuscaSelect" class="form-label">Buscar área</label>
+
+
+        <div class="sidebar-content bg-white shadow">
+
+            <div class="mb-3 areaBuscaList-container">
+                <label for="areaBuscaSelect" class="form-label">O que você está procurando</label>
                 <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off"
                     placeholder="Digite para buscar..." class="form-control" />
                 <datalist id="areaBuscaList"></datalist>
             </div>
 
-            <div class="mb-3">
-                <label for="categoriaSelect" class="form-label">Categoria</label>
-                <select id="categoriaSelect" class="form-select"></select>
-            </div>
+            
+            
 
-            <div class="mb-3">
-                <label for="andarSelect" class="form-label">Andar</label>
-                <select id="andarSelect" class="form-select"></select>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Origem</label>
+            <div class="mb-3 origem-container d-none">
+                <label class="form-label">Você está na frente do(a)..</label>
                 <input type="text" id="origem" list="origemList" autocomplete="off" class="form-control" />
                 <datalist id="origemList"></datalist>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 destino-container d-none">
                 <label class="form-label">Destino</label>
-                <input type="text" id="destino" list="destinoList" autocomplete="off" class="form-control"/>
+                <input type="text" id="destino" list="destinoList" autocomplete="off" class="form-control" />
                 <datalist id="destinoList"></datalist>
             </div>
+
+            
 
             <div class="sidebar-actions">
                 <button id="navegarBtn" class="btn btn-dark rounded-pill px-4 py-2">Navegar</button>
             </div>
+
+            <div class="mb-3 categoria-container d-none">
+                <label for="categoriaSelect" class="form-label">Categoria</label>
+                <select id="categoriaSelect" class="form-select"></select>
+            </div>
+
+            <div class="mb-3 d-none">
+                <label for="andarSelect" class="form-label">Escolha o Andar</label>
+                <select id="andarSelect" class="form-select"></select>
+            </div>
+
         </div>
     </div>
     <div id="map"></div>
@@ -192,6 +218,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- <script src="mapa.js"></script> -->
     <script src="mapa-local.js"></script>
+    <script src="js/menu.js"></script>
+    <script>
+    </script>
 </body>
 
 </html>

@@ -65,7 +65,8 @@
         //     destacarCaminho(caminho);
         // };
 
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5 });
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5, zoomControl: false});
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
         let overlayImg = null;
         let areaObjs = [], labelObjs = [], polyObjs = {};
         let currentAndarIdx = 0;

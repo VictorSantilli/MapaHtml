@@ -1953,7 +1953,7 @@ window.andares.push({
     };
 
     // Abre sidebar automaticamente em desktop
-    if (window.innerWidth > 600) openSidebar();
+    if (window.innerWidth < 600) closeSidebar();
 
     //Removido pois estava sendo sobreescrito
     // document.getElementById('navegarBtn').onclick = () => {
@@ -1977,8 +1977,10 @@ window.andares.push({
     // Inicializa o mapa sem camada base
     const map = L.map('map', {
         crs: L.CRS.Simple,
-        minZoom: -5
+        minZoom: -5,
+        zoomControl: false
     });
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     let overlayImg = null;
     let areaObjs = [], labelObjs = [], polyObjs = {};
@@ -2028,8 +2030,14 @@ window.andares.push({
                     // Adiciona ação ao texto ROTA
                     setTimeout(() => {
                         const rotaEl = document.querySelector('.popup-rota');
+                        const origemContainer = document.querySelector('.origem-container');
+                        const destinoContainer = document.querySelector('.destino-container');
+
                         if (rotaEl) {
                             rotaEl.onclick = function () {
+                                openSidebar();
+                                origemContainer.classList.remove('d-none');
+                                destinoContainer.classList.remove('d-none');
                                 document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
                                 document.getElementById('destino').dispatchEvent(new Event('input'));
                                 L.popup().remove();
