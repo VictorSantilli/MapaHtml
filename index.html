@@ -86,7 +86,7 @@
             cursor: pointer;
         }
 
-        .sidebar-content {
+        #sidebar-content {
             padding: 16px;
             flex: 1;
             display: flex;
@@ -100,25 +100,31 @@
             margin-top: 18px;
         }
 
-
-
         #menuBtn {
             display: none;
             position: fixed;
             top: 10px;
             right: 18px;
             z-index: 2100;
-
-
+        }
+        
+        #menuPisosBtn {
+            display: none;
+            position: fixed;
+            z-index: 2100;
+            bottom: 100px;
         }
 
-        .displayOff {
+        #menuRotaBtn {
             display: none;
+            position: fixed;
+            z-index: 2100;
+            bottom: 140px;
         }
 
         #closeSidebar{
                 display: none;
-            }
+        }
 
         @media (max-width: 600px) {
             #sidebar {
@@ -142,13 +148,11 @@
                 margin-left: 0;
             }
 
-            #menuBtn {
-                display: block;
-            }
 
-            #closeSidebar{
+            #closeSidebar, #menuRotaBtn, #menuPisosBtn, #menuBtn{
                 display: block;
             }
+           
 
 
         }
@@ -156,9 +160,10 @@
 </head>
 
 <body>
+    
     <button id="menuBtn" class="btn btn-primary d-md-none position-fixed top-0 end-0 m-3" title="Abrir menu">☰</button>
-
-    <button id="menuPisosBtn" class="btn btn-primary d-md-none position-fixed bot-0 end-0 m-3" title="Abrir menu"></button>
+    <button id="menuPisosBtn" class="btn btn-primary d-md-none position-fixed end-0 m-3" title="Abrir menu andar">Pisos</button>
+    <button id="menuRotaBtn" class="btn btn-primary d-md-none position-fixed end-0 m-3" title="Crie a rota">Rota</button>
 
 
     <div id="sidebar" class="d-flex flex-column open">
@@ -171,42 +176,39 @@
 
 
 
-        <div class="sidebar-content bg-white shadow">
+        <div id="sidebar-content" class="bg-white shadow">
 
-            <div class="mb-3 areaBuscaList-container">
+            <div id="areaBuscaList-container" class="mb-3 d-none">
                 <label for="areaBuscaSelect" class="form-label">O que você está procurando</label>
                 <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off"
                     placeholder="Digite para buscar..." class="form-control" />
                 <datalist id="areaBuscaList"></datalist>
             </div>
 
-            
-            
+            <div id="categoria-container" class="mb-3 d-none">
+                <label for="categoriaSelect" class="form-label">Categoria</label>
+                <select id="categoriaSelect" class="form-select"></select>
+            </div>
 
-            <div class="mb-3 origem-container d-none">
+            <div id="origem-container" class="mb-3 d-none">
                 <label class="form-label">Você está na frente do(a)..</label>
                 <input type="text" id="origem" list="origemList" autocomplete="off" class="form-control" />
                 <datalist id="origemList"></datalist>
             </div>
 
-            <div class="mb-3 destino-container d-none">
+            <div id="destino-container" class="mb-3 d-none">
                 <label class="form-label">Destino</label>
                 <input type="text" id="destino" list="destinoList" autocomplete="off" class="form-control" />
                 <datalist id="destinoList"></datalist>
             </div>
 
-            
-
-            <div class="sidebar-actions">
+            <div id="navegarBtn-container" class="sidebar-actions d-none">
                 <button id="navegarBtn" class="btn btn-dark rounded-pill px-4 py-2">Navegar</button>
             </div>
 
-            <div class="mb-3 categoria-container d-none">
-                <label for="categoriaSelect" class="form-label">Categoria</label>
-                <select id="categoriaSelect" class="form-select"></select>
-            </div>
+            
 
-            <div class="mb-3 d-none">
+            <div id="andar-container" class="mb-3 d-none">
                 <label for="andarSelect" class="form-label">Escolha o Andar</label>
                 <select id="andarSelect" class="form-select"></select>
             </div>
@@ -217,8 +219,8 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- <script src="mapa.js"></script> -->
-    <script src="mapa-local.js"></script>
     <script src="js/menu.js"></script>
+    <script src="mapa-local.js"></script>
     <script>
     </script>
 </body>

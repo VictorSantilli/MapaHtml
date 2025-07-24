@@ -1927,52 +1927,18 @@ window.andares.push({
     const sidebar = document.getElementById('sidebar');
     const menuBtn = document.getElementById('menuBtn');
     const btnCloseSideBar = document.getElementById('closeSidebar')
+    const menuAndarBtn = document.getElementById('menuPisosBtn');
+    const menuRotaBtn = document.getElementById('menuRotaBtn');
 
-    function openSidebar() {
-        sidebar.classList.add('open');
+    function limparMarcadoresCategoria() {
+        categoriaMarkers.forEach(m => map.removeLayer(m));
+        categoriaMarkers = [];
     }
 
-    function closeSidebar() {
-        sidebar.classList.remove('open');
-        if (window.innerWidth <= 600) {
-            menuBtn.style.display = 'block'; // Mostra o botão ao fechar
-        }
+    function limparEstilosDasAreas() {
+        areaObjs.forEach(a => a.setStyle({ color: 'transparent', weight: 3 }));
     }
 
-    menuBtn.onclick = () => {
-        sidebar.classList.toggle('open');
-
-        if (sidebar.classList.contains('open')) {
-            // Esconde o botão ao abrir a sidebar
-            menuBtn.style.display = 'none';
-        }
-    };
-
-    btnCloseSideBar.onclick = () => {
-        closeSidebar();
-    };
-
-    // Abre sidebar automaticamente em desktop
-    if (window.innerWidth < 600) closeSidebar();
-
-    //Removido pois estava sendo sobreescrito
-    // document.getElementById('navegarBtn').onclick = () => {
-    //     const origemNome = document.getElementById('origem').value;
-    //     const destinoNome = document.getElementById('destino').value;
-
-    //     const areasAndar = andares[currentAndarIdx].areas;
-    //     const areaOrigem = areasAndar.find(a => a.nome === origemNome);
-    //     const areaDestino = areasAndar.find(a => a.nome === destinoNome);
-    //     if (!areaOrigem || !areaDestino) {
-    //         alert('Selecione áreas válidas para origem e destino!');
-    //         return;
-    //     }
-    //     const coordOrigem = areaOrigem.label;
-    //     const coordDestino = areaDestino.label;
-    //     const caminho = buscarCaminho(coordOrigem, coordDestino);
-    //     destacarCaminho(caminho);
-    //     closeSidebar();
-    // };
 
     // Inicializa o mapa sem camada base
     const map = L.map('map', {
@@ -1990,6 +1956,7 @@ window.andares.push({
     const LABEL_ZOOM_THRESHOLD = 0; // ajuste conforme necessário
     let routeMarkers = [];
     let categoriaMarkers = [];
+
 
     function desenharAndar(idx) {
         const andar = andares[idx];
@@ -2013,6 +1980,7 @@ window.andares.push({
 
             if (area) {
                 area.on('click', function () {
+                    map.closePopup();
                     areaObjs.forEach(a2 => a2.setStyle({ color: 'transparent' }));
                     area.setStyle({ color: 'red' });
                     map.setView(a.label, map.getZoom(), { animate: true });
@@ -2027,23 +1995,8 @@ window.andares.push({
                               </div>
                             `)
                         .openOn(map);
-                    // Adiciona ação ao texto ROTA
-                    setTimeout(() => {
-                        const rotaEl = document.querySelector('.popup-rota');
-                        const origemContainer = document.querySelector('.origem-container');
-                        const destinoContainer = document.querySelector('.destino-container');
 
-                        if (rotaEl) {
-                            rotaEl.onclick = function () {
-                                openSidebar();
-                                origemContainer.classList.remove('d-none');
-                                destinoContainer.classList.remove('d-none');
-                                document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
-                                document.getElementById('destino').dispatchEvent(new Event('input'));
-                                L.popup().remove();
-                            };
-                        }
-                    }, 100);
+
                 });
                 areaObjs.push(area);
             }
@@ -2053,6 +2006,8 @@ window.andares.push({
             });
             labelMarkers.push(label);
         });
+
+
         // Desenha segmentos (inicialmente invisíveis)
         andar.segmentos.forEach(seg => {
             const poly = L.polyline([seg.a, seg.b], {
@@ -2085,8 +2040,7 @@ window.andares.push({
         // Remove marcadores de rota e categoria ao trocar de andar
         routeMarkers.forEach(m => map.removeLayer(m));
         routeMarkers = [];
-        categoriaMarkers.forEach(m => map.removeLayer(m));
-        categoriaMarkers = [];
+        limparMarcadoresCategoria();
         areaObjs = []; labelObjs = []; polyObjs = {};
         desenharAndar(this.value);
     };
@@ -2204,6 +2158,9 @@ window.andares.push({
     let btnCheguei = null;
 
     navegarBtn.onclick = () => {
+
+        limparMarcadoresCategoria();
+
         if (aguardandoTransicaoAndar) return; // Evita múltiplos cliques
         const origemInput = document.getElementById('origem').value;
         const destinoInput = document.getElementById('destino').value;
@@ -2266,7 +2223,7 @@ window.andares.push({
 
                     const caminho2 = buscarCaminho(transicaoTransferDestino.label, transicaoDestinoLabel);
                     destacarCaminho(caminho2, transicaoTransferDestino.label, transicaoDestinoLabel);
-                    
+
                     aguardandoTransicaoAndar = false;
                     btnCheguei.remove();
                 };
@@ -2274,6 +2231,12 @@ window.andares.push({
             document.body.appendChild(btnCheguei);
         }
         closeSidebar();
+        if (window.innerWidth <= 600) {
+            showContainer(menuRotaBtn);
+            showContainer(menuAndarBtn);
+            showContainer(menuBtn);
+        }
+
     };
 
 
@@ -2416,8 +2379,7 @@ window.andares.push({
 
     categoriaSelect.onchange = function () {
         // Remove marcadores antigos
-        categoriaMarkers.forEach(m => map.removeLayer(m));
-        categoriaMarkers = [];
+        limparMarcadoresCategoria();
         const cat = categoriaSelect.value;
         // Procura se o andar atual tem a categoria
         const areasNoAndar = andares[currentAndarIdx].areas.filter(area => area.categoria === cat);
@@ -2469,5 +2431,43 @@ window.andares.push({
             }
         });
     };
+
+    // Acao para o btn de Rota
+    map.on('popupopen', function (e) {
+        const popupEl = e.popup.getElement();
+        const rotaBtn = popupEl.querySelector('.popup-rota');
+
+        if (rotaBtn) {
+            rotaBtn.onclick = function () {
+                const nomeLoja = popupEl.querySelector('b')?.innerText ?? '';
+                const andarAtual = andares[currentAndarIdx].nome;
+                const destinoFull = `${nomeLoja} [${andarAtual}]`;
+
+                ocultarButtons();
+                openSidebar();
+                showContainer(document.getElementById('origem-container'));
+                showContainer(document.getElementById('destino-container'));
+                showContainer(document.getElementById('navegarBtn-container'));
+
+                const inputDestino = document.getElementById('destino');
+                inputDestino.value = destinoFull;
+                inputDestino.dispatchEvent(new Event('input'));
+
+                map.closePopup();
+            };
+        }
+    });
+
+
+
+    const observer = new MutationObserver(() => {
+        if (sidebar.classList.contains('open')) {
+            limparMarcadoresCategoria();
+            limparEstilosDasAreas();
+        }
+    });
+
+    // Observar alterações na classe do sidebar
+    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
 
 })();
