@@ -9,6 +9,7 @@
     let response;
     try {
         response = await fetch(url);
+        console.log(response.data)
         if (!response.ok) throw new Error('Erro ao buscar dados da API');
         window.andares = await response.json();
     } catch (e) {
@@ -16,6 +17,7 @@
         return;
     }
     inicializarMapa();
+
 
     function inicializarMapa() {
         const andarSelect = document.getElementById('andarSelect');
@@ -38,6 +40,33 @@
 
 
         const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5, zoomControl: false });
+
+        // Acao para o btn de Rota
+        map.on('popupopen', function (e) {
+            const popupEl = e.popup.getElement();
+            const rotaBtn = popupEl.querySelector('.popup-rota');
+
+            if (rotaBtn) {
+                rotaBtn.onclick = function () {
+                    const nomeLoja = popupEl.querySelector('b')?.innerText ?? '';
+                    const andarAtual = andares[currentAndarIdx].nome;
+                    const destinoFull = `${nomeLoja} [${andarAtual}]`;
+
+                    ocultarButtons();
+                    openSidebar();
+                    showContainer(document.getElementById('origem-container'));
+                    showContainer(document.getElementById('destino-container'));
+                    showContainer(document.getElementById('navegarBtn-container'));
+
+                    const inputDestino = document.getElementById('destino');
+                    inputDestino.value = destinoFull;
+                    inputDestino.dispatchEvent(new Event('input'));
+
+                    map.closePopup();
+                };
+            }
+        });
+
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         let overlayImg = null;
         let areaObjs = [], labelObjs = [], polyObjs = {};
@@ -297,10 +326,10 @@
             }
             closeSidebar();
             if (window.innerWidth <= 600) {
-            showContainer(menuRotaBtn);
-            showContainer(menuAndarBtn);
-            showContainer(menuBtn);
-        }
+                showContainer(menuRotaBtn);
+                showContainer(menuAndarBtn);
+                showContainer(menuBtn);
+            }
         };
 
         function getAllAreasWithAndar() {
@@ -467,44 +496,21 @@
             });
         };
 
-    }
+        const observer = new MutationObserver(() => {
+            if (sidebar.classList.contains('open')) {
+                limparMarcadoresCategoria();
+                limparEstilosDasAreas();
+            }
+        });
 
-        // Acao para o btn de Rota
-    map.on('popupopen', function (e) {
-        const popupEl = e.popup.getElement();
-        const rotaBtn = popupEl.querySelector('.popup-rota');
+        // Observar alterações na classe do sidebar
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
 
-        if (rotaBtn) {
-            rotaBtn.onclick = function () {
-                const nomeLoja = popupEl.querySelector('b')?.innerText ?? '';
-                const andarAtual = andares[currentAndarIdx].nome;
-                const destinoFull = `${nomeLoja} [${andarAtual}]`;
-
-                ocultarButtons();
-                openSidebar();
-                showContainer(document.getElementById('origem-container'));
-                showContainer(document.getElementById('destino-container'));
-                showContainer(document.getElementById('navegarBtn-container'));
-
-                const inputDestino = document.getElementById('destino');
-                inputDestino.value = destinoFull;
-                inputDestino.dispatchEvent(new Event('input'));
-
-                map.closePopup();
-            };
-        }
-    });
+    };
 
 
 
-    const observer = new MutationObserver(() => {
-        if (sidebar.classList.contains('open')) {
-            limparMarcadoresCategoria();
-            limparEstilosDasAreas();
-        }
-    });
 
-    // Observar alterações na classe do sidebar
-    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
 
 })();
