@@ -24,48 +24,20 @@
         const sidebar = document.getElementById('sidebar');
         const menuBtn = document.getElementById('menuBtn');
         const btnCloseSideBar = document.getElementById('closeSidebar')
+        const menuAndarBtn = document.getElementById('menuPisosBtn');
+        const menuRotaBtn = document.getElementById('menuRotaBtn');
 
-        function openSidebar() {
-            sidebar.classList.add('open');
+        function limparMarcadoresCategoria() {
+            categoriaMarkers.forEach(m => map.removeLayer(m));
+            categoriaMarkers = [];
         }
 
-        function closeSidebar() {
-            sidebar.classList.remove('open');
-            if (window.innerWidth <= 600) {
-                menuBtn.style.display = 'block'; // Mostra o botão ao fechar
-            }
+        function limparEstilosDasAreas() {
+            areaObjs.forEach(a => a.setStyle({ color: 'transparent', weight: 3 }));
         }
-        menuBtn.onclick = () => {
-            sidebar.classList.toggle('open');
 
-            if (sidebar.classList.contains('open')) {
-                // Esconde o botão ao abrir a sidebar
-                menuBtn.style.display = 'none';
-            }
-        };
 
-        btnCloseSideBar.onclick = () => {
-            closeSidebar();
-        };
-        if (window.innerWidth > 600) openSidebar();
-
-        // document.getElementById('navegarBtn').onclick = () => {
-        //     const origemNome = document.getElementById('origem').value;
-        //     const destinoNome = document.getElementById('destino').value;
-        //     const areasAndar = andares[currentAndarIdx].areas;
-        //     const areaOrigem = areasAndar.find(a => a.nome === origemNome);
-        //     const areaDestino = areasAndar.find(a => a.nome === destinoNome);
-        //     if (!areaOrigem || !areaDestino) {
-        //         alert('Selecione áreas válidas para origem e destino!');
-        //         return;
-        //     }
-        //     const coordOrigem = areaOrigem.label;
-        //     const coordDestino = areaDestino.label;
-        //     const caminho = buscarCaminho(coordOrigem, coordDestino);
-        //     destacarCaminho(caminho);
-        // };
-
-        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5, zoomControl: false});
+        const map = L.map('map', { crs: L.CRS.Simple, minZoom: -5, zoomControl: false });
         L.control.zoom({ position: 'bottomright' }).addTo(map);
         let overlayImg = null;
         let areaObjs = [], labelObjs = [], polyObjs = {};
@@ -94,6 +66,7 @@
                 area = L.polygon(a.coord, { color: 'transparent', weight: 3, fillColor: a.cor, fillOpacity: 0.5 }).addTo(map);
                 if (area) {
                     area.on('click', function () {
+                        map.closePopup();
                         areaObjs.forEach(a2 => a2.setStyle({ color: 'transparent' }));
                         area.setStyle({ color: 'red' });
                         map.setView(a.label, map.getZoom(), { animate: true });
@@ -108,16 +81,6 @@
                               </div>
                             `)
                             .openOn(map);
-                        setTimeout(() => {
-                            const rotaEl = document.querySelector('.popup-rota');
-                            if (rotaEl) {
-                                rotaEl.onclick = function () {
-                                    document.getElementById('destino').value = `${a.nome} [${andares[currentAndarIdx].nome}]`;
-                                    document.getElementById('destino').dispatchEvent(new Event('input'));
-                                    L.popup().remove();
-                                };
-                            }
-                        }, 100);
                     });
                     areaObjs.push(area);
                 }
@@ -156,8 +119,7 @@
             Object.values(polyObjs).forEach(p => map.removeLayer(p));
             routeMarkers.forEach(m => map.removeLayer(m));
             routeMarkers = [];
-            categoriaMarkers.forEach(m => map.removeLayer(m));
-            categoriaMarkers = [];
+            limparMarcadoresCategoria();
             areaObjs = []; labelObjs = []; polyObjs = {};
             desenharAndar(this.value);
         };
@@ -269,6 +231,9 @@
         let btnCheguei = null;
 
         navegarBtn.onclick = () => {
+
+            limparMarcadoresCategoria();
+
             if (aguardandoTransicaoAndar) return;
             const origemInput = document.getElementById('origem').value;
             const destinoInput = document.getElementById('destino').value;
@@ -331,6 +296,11 @@
                 document.body.appendChild(btnCheguei);
             }
             closeSidebar();
+            if (window.innerWidth <= 600) {
+            showContainer(menuRotaBtn);
+            showContainer(menuAndarBtn);
+            showContainer(menuBtn);
+        }
         };
 
         function getAllAreasWithAndar() {
@@ -498,4 +468,43 @@
         };
 
     }
+
+        // Acao para o btn de Rota
+    map.on('popupopen', function (e) {
+        const popupEl = e.popup.getElement();
+        const rotaBtn = popupEl.querySelector('.popup-rota');
+
+        if (rotaBtn) {
+            rotaBtn.onclick = function () {
+                const nomeLoja = popupEl.querySelector('b')?.innerText ?? '';
+                const andarAtual = andares[currentAndarIdx].nome;
+                const destinoFull = `${nomeLoja} [${andarAtual}]`;
+
+                ocultarButtons();
+                openSidebar();
+                showContainer(document.getElementById('origem-container'));
+                showContainer(document.getElementById('destino-container'));
+                showContainer(document.getElementById('navegarBtn-container'));
+
+                const inputDestino = document.getElementById('destino');
+                inputDestino.value = destinoFull;
+                inputDestino.dispatchEvent(new Event('input'));
+
+                map.closePopup();
+            };
+        }
+    });
+
+
+
+    const observer = new MutationObserver(() => {
+        if (sidebar.classList.contains('open')) {
+            limparMarcadoresCategoria();
+            limparEstilosDasAreas();
+        }
+    });
+
+    // Observar alterações na classe do sidebar
+    observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
 })();

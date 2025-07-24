@@ -1995,8 +1995,6 @@ window.andares.push({
                               </div>
                             `)
                         .openOn(map);
-
-
                 });
                 areaObjs.push(area);
             }
