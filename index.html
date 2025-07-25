@@ -3,7 +3,11 @@
 
 <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mapa Interativo SVG com Leaflet</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         html,
@@ -12,6 +16,8 @@
             height: 100%;
             margin: 0;
         }
+
+        /* Area de estilização do app*/
 
         .svg-overlay {
             pointer-events: auto;
@@ -47,18 +53,18 @@
             align-items: center;
         }
 
+        /**/
+
         #sidebar {
             position: fixed;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 270px;
-            background: #fff;
-            border-right: 1px solid #ddd;
+            width: 300px;
             z-index: 1000;
-            box-shadow: 2px 0 8px #0001;
             display: flex;
             flex-direction: column;
+
         }
 
         .sidebar-header {
@@ -69,6 +75,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 30px;
         }
 
         .sidebar-header button {
@@ -79,24 +86,12 @@
             cursor: pointer;
         }
 
-        .sidebar-content {
+        #sidebar-content {
             padding: 16px;
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 12px;
-        }
-
-        .sidebar-content label {
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .sidebar-content select {
-            padding: 6px;
-            font-size: 15px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
         }
 
         .sidebar-actions {
@@ -105,28 +100,30 @@
             margin-top: 18px;
         }
 
-        #navegarBtn {
-            background: #1a2b3c;
-            color: #fff;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 22px;
-            font-size: 16px;
-            cursor: pointer;
+        #menuBtn {
+            display: none;
+            position: fixed;
+            top: 10px;
+            right: 18px;
+            z-index: 2100;
+        }
+        
+        #menuPisosBtn {
+            display: none;
+            position: fixed;
+            z-index: 2100;
+            bottom: 100px;
         }
 
-        .simular {
-            background: #ffd23c;
-            color: #222;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 22px;
-            font-size: 16px;
-            cursor: pointer;
+        #menuRotaBtn {
+            display: none;
+            position: fixed;
+            z-index: 2100;
+            bottom: 140px;
         }
 
-        #map {
-            margin-left: 270px;
+        #closeSidebar{
+                display: none;
         }
 
         @media (max-width: 600px) {
@@ -151,62 +148,81 @@
                 margin-left: 0;
             }
 
-            #menuBtn {
+
+            #closeSidebar, #menuRotaBtn, #menuPisosBtn, #menuBtn{
                 display: block;
             }
-        }
+           
 
-        #menuBtn {
-            display: none;
-            position: fixed;
-            top: 18px;
-            left: 18px;
-            z-index: 2100;
-            background: #0070d1;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            width: 44px;
-            height: 44px;
-            font-size: 28px;
-            cursor: pointer;
-            box-shadow: 1px 1px 8px #0002;
+
         }
     </style>
 </head>
 
 <body>
-    <button id="menuBtn" title="Abrir menu">☰</button>
-    <div id="sidebar" class="open">
-        <div class="sidebar-header">
-            <span>Direções</span>
-            <button id="closeSidebar" title="Fechar">×</button>
+    
+    <button id="menuBtn" class="btn btn-primary d-md-none position-fixed top-0 end-0 m-3" title="Abrir menu">☰</button>
+    <button id="menuPisosBtn" class="btn btn-sm btn-primary d-md-none position-fixed end-0 m-3" title="Abrir menu andar"><img src="assets/img/stacks_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="Rota"></button>
+    <button id="menuRotaBtn" class="btn btn-sm btn-primary d-md-none position-fixed end-0 m-3" title="Crie a rota"><img src="assets/img/directions_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.svg" alt="Rota"></button>
+
+
+    <div id="sidebar" class="d-flex flex-column open">
+
+        <div
+            class="sidebar-header bg-primary text-white fw-bold px-3 py-2 d-flex justify-content-end align-items-rigth">
+
+            <button id="closeSidebar" class="btn btn-sm btn-light" title="Fechar">×</button>
         </div>
-        <div class="sidebar-content">
-            <label for="areaBuscaSelect">Buscar área</label>
-            <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off" placeholder="Digite para buscar..." />
-            <datalist id="areaBuscaList"></datalist>
-            <label for="categoriaSelect">Categoria</label>
-            <select id="categoriaSelect"></select>
-            <label for="andarSelect">Andar</label>
-            <select id="andarSelect"></select>
-            <label>Origem</label>
-            <input type="text" id="origem" list="origemList" autocomplete="off" />
-            <datalist id="origemList"></datalist>
-            <label>Destino</label>
-            <input type="text" id="destino" list="destinoList" autocomplete="off" />
-            <datalist id="destinoList"></datalist>
-            <div class="sidebar-actions">
-                <button id="navegarBtn">Navegar</button>
-                <button id="simularBtn" class="simular">Simular</button>
+
+
+
+        <div id="sidebar-content" class="bg-white shadow">
+
+            <div id="areaBuscaList-container" class="mb-3 d-none">
+                <label for="areaBuscaSelect" class="form-label">O que você está procurando</label>
+                <input type="text" id="areaBuscaSelect" list="areaBuscaList" autocomplete="off"
+                    placeholder="Digite para buscar..." class="form-control" />
+                <datalist id="areaBuscaList"></datalist>
             </div>
+
+            <div id="categoria-container" class="mb-3 d-none">
+                <label for="categoriaSelect" class="form-label">Categoria</label>
+                <select id="categoriaSelect" class="form-select"></select>
+            </div>
+
+            <div id="origem-container" class="mb-3 d-none">
+                <label class="form-label">Você está na frente do(a)..</label>
+                <input type="text" id="origem" list="origemList" autocomplete="off" class="form-control" />
+                <datalist id="origemList"></datalist>
+            </div>
+
+            <div id="destino-container" class="mb-3 d-none">
+                <label class="form-label">Destino</label>
+                <input type="text" id="destino" list="destinoList" autocomplete="off" class="form-control" />
+                <datalist id="destinoList"></datalist>
+            </div>
+
+            <div id="navegarBtn-container" class="sidebar-actions d-none">
+                <button id="navegarBtn" class="btn btn-dark rounded-pill px-4 py-2">Navegar</button>
+            </div>
+
+            
+
+            <div id="andar-container" class="mb-3 d-none">
+                <label for="andarSelect" class="form-label">Escolha o Andar</label>
+                <select id="andarSelect" class="form-select"></select>
+            </div>
+
         </div>
     </div>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/menu.js"></script>
     <script src="mapa.js"></script>
     <!-- <script src="mapa-local.js"></script> -->
+    <script>
+    </script>
 </body>
 
 </html>
