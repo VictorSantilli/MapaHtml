@@ -2228,11 +2228,16 @@ window.andares.push({
             }
             document.body.appendChild(btnCheguei);
         }
-        closeSidebar();
+        
         if (window.innerWidth <= 600) {
+            closeSidebar();
             showContainer(menuRotaBtn);
             showContainer(menuAndarBtn);
             showContainer(menuBtn);
+        } else {
+            openSidebar();
+            showContainer(categoriaContainer);
+            showContainer(AreaBuscaContainer);
         }
 
     };
@@ -2428,6 +2433,8 @@ window.andares.push({
                 categoriaMarkers.push(marker);
             }
         });
+
+        
     };
 
     // Acao para o btn de Rota

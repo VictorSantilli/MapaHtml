@@ -324,11 +324,15 @@
                 }
                 document.body.appendChild(btnCheguei);
             }
-            closeSidebar();
             if (window.innerWidth <= 600) {
+                closeSidebar();
                 showContainer(menuRotaBtn);
                 showContainer(menuAndarBtn);
                 showContainer(menuBtn);
+            } else {
+                openSidebar();
+                showContainer(categoriaContainer);
+                showContainer(AreaBuscaContainer);
             }
         };
 

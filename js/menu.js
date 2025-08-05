@@ -20,16 +20,6 @@ const btnCloseSideBar = document.getElementById('closeSidebar')
 const menuAndarBtn = document.getElementById('menuPisosBtn');
 const menuRotaBtn = document.getElementById('menuRotaBtn');
 
-// Abre sidebar automaticamente em desktop
-if (window.innerWidth < 600) {
-    closeSidebar();
-}
-
-if(window.innerWidth > 600){
-    showContainer(AreaBuscaContainer);
-    showContainer(categoriaContainer);
-}
-
 
 
 // funcao utilitarias
@@ -60,25 +50,42 @@ function closeSidebar() {
         menuBtn.style.display = 'block'; // Mostra o botão ao fechar
     }
 }
-function ocultarButtons(){
+
+function ocultarButtons() {
     ocultarContainer(menuAndarBtn);
     ocultarContainer(menuRotaBtn);
     ocultarContainer(menuBtn);
 }
 
-function showButtons(){
+function showButtons() {
     showContainer(menuAndarBtn);
     showContainer(menuBtn);
     showContainer(menuRotaBtn);
+}
+
+function ocultarContainerFuncionalidades() {
+    ocultarContainer(andarContainer);
+    ocultarContainer(navegarBtnContainer);
+    ocultarContainer(origemContainer);
+    ocultarContainer(destinoContainer);
 }
 
 //Eventos
 
 //Eventos de clique
 menuAndarBtn.onclick = () => {
-    openSidebar();
-    ocultarButtons();
-    showContainer(andarContainer);
+    if (window.innerWidth <= 600) {
+        ocultarContainerFuncionalidades();
+        openSidebar();
+        ocultarButtons();
+        showContainer(andarContainer);
+    } else {
+        ocultarContainerFuncionalidades();
+        openSidebar();
+        showContainer(andarContainer);
+        showButtons();
+    }
+
 };
 
 menuBtn.onclick = () => {
@@ -92,14 +99,24 @@ menuBtn.onclick = () => {
 };
 
 menuRotaBtn.onclick = () => {
-    ocultarButtons();
+    if (window.innerWidth <= 600) {
+        ocultarContainerFuncionalidades();
+        openSidebar();
+        ocultarButtons();
+        showContainer(origemContainer);
+        showContainer(destinoContainer);
+        showContainer(navegarBtnContainer);
+    } else {
+        ocultarContainerFuncionalidades();
+        openSidebar();
+        showContainer(origemContainer);
+        showContainer(destinoContainer);
+        showContainer(navegarBtnContainer);
+        showButtons();
+    }
 
-    openSidebar();
 
-    showContainer(origemContainer);
-    showContainer(destinoContainer);
-    showContainer(navegarBtnContainer);
-    
+
 };
 
 btnCloseSideBar.onclick = () => {
@@ -112,8 +129,16 @@ btnCloseSideBar.onclick = () => {
 
 //Eventos de listener
 categoriaSelect.addEventListener('change', function () {
-    closeSidebar();
-    showButtons();
+    if (window.innerWidth <= 600) {
+        closeSidebar();
+        showContainer(menuRotaBtn);
+        showContainer(menuAndarBtn);
+        showContainer(menuBtn);
+    } else {
+        openSidebar();
+        showContainer(categoriaContainer);
+        showContainer(AreaBuscaContainer);
+    }
 });
 
 andarSelect.addEventListener('change', function () {
@@ -133,3 +158,16 @@ areaBuscaSelect.addEventListener('change', function () {
         showButtons();
     }
 });
+
+
+// Abre sidebar automaticamente em desktop
+if (window.innerWidth < 600) {
+    closeSidebar();
+    showButtons();
+}
+
+if (window.innerWidth > 600) {
+    showContainer(AreaBuscaContainer);
+    showContainer(categoriaContainer);
+    showButtons();
+}
